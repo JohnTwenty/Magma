@@ -1,0 +1,78 @@
+# Simple Particle Physics Demo
+
+Commands
+	{
+	main
+		{
+		print{ "Particle Physics Demo"; }
+		createWindow{1024; 1024; 0; }
+		createComputeContext;
+		setResourceDirectory{"../Media/Particles/"; }
+		loadResource{ swapChain; "f.swapchain.bmp"; }
+
+		#allocate particles
+
+		loadResource{ particles; "f.zero(16 1024).array"; }	# (particleSize=sizeof(vec4), nParticles)
+		bindResourceSlot { particles; 1; }
+
+		#initialize particles w initial conditions
+
+		loadResource{initShader; "initUniform.hlsl"; }
+		bindResource { initShader; }
+		compute{ 16; 1; 1;}
+
+		#allocate a grid
+		# for some reason I cannot use textures for random access ... there are some posts that float textures are not random access.
+		# *********
+		#loadResource{ grid; "f.tex2d(64 64).bmp"; }	#scratch buffer
+		loadResource{ grid; "f.uninit(16 4096).array"; }	#16 is size of float4, and we want 64*64 elements. Use zero or uninit for initial condition.
+		# *********
+		
+		bindResourceSlot { grid; 2; }
+
+
+		loadResource{clearGridShader; "clearGrid.hlsl"; }
+		loadResource{simParticlesShader; "particlePhysics.hlsl"; }
+		loadResource{solveGridShader; "solveGrid.hlsl"; }
+		loadResource{drawGridShader; "drawGrid.hlsl"; }
+
+		#loadResource {cameraConstants; "f.16.cs_const"; }	# not used so far
+		#bindResource { cameraConstants; }
+
+
+		bindKey { F5; reloadResources; }
+		bindKey { Escape; quit; }
+
+
+		setRenderCallback{ renderCallback;  }
+		appLoop;
+		}
+
+	renderCallback
+		{
+		bindResource { swapChain; }
+
+		#clear back buffer
+		clearResource{ swapChain; }
+
+		# clear the grid
+		bindResource { clearGridShader; }
+		compute{ 2; 2; 1;}
+
+		# simulate each particle, write to grid, also draw to back buffer
+		bindResource { simParticlesShader; }
+		compute{ 16; 1; 1;}		
+
+		# do grid density solve
+		bindResource { solveGridShader; }
+		compute{ 2; 2; 1;}
+		
+		# raymarch each pixel using grid data.
+		bindResource { drawGridShader; }
+		compute{ 64; 64; 1;}
+
+
+		present;
+		}
+
+	}
