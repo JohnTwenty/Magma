@@ -1,0 +1,58 @@
+# test script
+
+Commands
+	{
+	main						#whichever subroutine comes first here gets run by default.
+		{
+		print{ "ShaderToy test"; }
+		createWindow{1024; 1024; 0; }
+		createContext;
+		setResourceDirectory{"../media/"; }
+		loadResource {vsConstants; "f.16.vs_const"; }
+		setTransformClipSpaceIdentity {vsConstants;}
+		loadResource {psConstants; "f.16.ps_const"; }
+		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
+		
+
+		bindKey { F5; reloadResources; }			#for now only f(void) signature commands can be bound.
+		bindKey { Escape; quit; }
+
+		loadResource{vshader; "simpleVertexShader.hlsl"; }
+		#loadResource{vshader; "simpleVertex.Shader.ods"; }		#this ODS wrapped version works too but is unnecessary
+		#loadResource{pshader; "toyPixelShader.hlsl"; }			#a circle
+		loadResource{pshader; "simpleMinecraftPixelShader.hlsl"; }
+		#loadResource{pshader; "simpleTerrainPixelShader.hlsl"; }	#works too
+
+		loadResource{ mesh; "fullScreenQuad.Mesh.ods"; }
+
+		bindResource{ vshader; }
+
+		
+		loadResource{ voxmap; "blah.voxvol"; }
+		bindResource{ voxmap;}
+
+		bindKey { "W"; camForward; }
+		bindKey { "A"; camLeft; }
+		bindKey { "S"; camBack; }
+		bindKey { "D"; camRight; }
+		bindKey { "Q"; camUp; }
+		bindKey { "Z"; camDown; }
+		bindMouse { mouseFunc; }
+
+
+
+		setRenderCallback{ renderCallback;  }
+		appLoop;												#this is a blocking call!
+		}
+
+	renderCallback	#a command sequence
+		{
+		setCommonPShaderConstants { psConstants; }
+		bindResource { vsConstants; }
+		bindResource { psConstants; }
+		bindResource{ swapChain; }
+		bindResource{ pshader; }								#we will frequently reload this so rebind it each time
+		drawResource{ mesh; }
+		present;
+		}
+	}

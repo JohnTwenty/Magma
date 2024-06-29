@@ -1,0 +1,39 @@
+# test script
+
+Commands
+	{
+	main
+		{
+		print { "Tex2D 2D Triangle test"; }
+		createWindow{640; 480; 0; }
+		createContext;
+		setResourceDirectory{"../media/"; }
+		loadResource {vsConstants; "f.16.vs_const"; }
+		setTransformClipSpaceIdentity {vsConstants;}
+
+		loadResource {psConstants; "f.16.ps_const";} 
+		setCommonPShaderConstants { psConstants; }
+
+		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
+
+		loadResource{vshader; "tex2VertexShader.hlsl"; }
+		loadResource{pshader; "tex2PixelShader.hlsl"; }
+		#loadResource{pshader; "simplePixelShader.hlsl"; }	
+
+        loadResource{tex; "hello.png";}
+
+		bindResource{ vsConstants; }
+		bindResource { psConstants; }
+		bindResource{ vshader; }
+		bindResource{ pshader; }
+		bindResource{ swapChain; }
+        bindResource { tex; }
+
+		loadResource{mesh; "tex2Triangle.Mesh.ods"; }
+		
+		drawResource{ mesh; }
+
+		present;
+		sleep;
+		}
+	}

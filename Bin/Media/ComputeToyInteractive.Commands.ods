@@ -1,0 +1,35 @@
+# Basic single pass interactive compute shader setup
+
+Commands
+	{
+	main						#whichever subroutine comes first here gets run by default.
+		{
+		print{ "ComputeToy"; }
+		createWindow{1024; 1024; 0; }
+		createComputeContext;
+		setResourceDirectory{"../media/"; }
+
+		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
+
+		bindKey { F5; reloadResources; }			#for now only f(void) signature commands can be bound.
+		bindKey { Escape; quit; }
+
+		loadResource{cshader; "computeToyShaderInteractive.hlsl"; }
+
+		loadResource {cameraConstants; "f.16.cs_const"; }
+		bindResource { cameraConstants; }
+		bindResource { cshader; }
+
+		setRenderCallback{ renderCallback;  }
+		appLoop;										#this is a blocking call!
+		}
+
+	renderCallback
+		{
+		bindResource { swapChain; }						#has to be rebound each present
+		setCommonPShaderConstants { cameraConstants; }
+		compute{ 64; 64; 1;}							#Dispatch -- size depends on window size!
+		present;
+		}
+
+	}

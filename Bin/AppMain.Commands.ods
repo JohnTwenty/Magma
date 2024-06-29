@@ -6,11 +6,10 @@ Commands
 		{
 		## Uncomment the line(s) to run.
 		#compute shaders
-		#runCommands { "../Media/VoxelGame/VoxelGame.Commands.ods"; }
-		runCommands { "../Media/Particles/Physics.Commands.ods"; }
+		runCommands { "../Media/VoxelGame/VoxelGame.Commands.ods"; }
+		#runCommands { "../Media/Particles/Physics.Commands.ods"; }
 		#runCommands { "../Media/ComputeToyImage.Commands.ods"; }
 		#runCommands { "../Media/ComputeToyInteractive.Commands.ods"; }
-		#runCommands { "../Media/forwardRender.Commands.ods"; }		#unfinished, TODO
 
 		#vertex and pixel shader based stuff
 		#runCommands { "../Media/test2DTriangle.Commands.ods"; }

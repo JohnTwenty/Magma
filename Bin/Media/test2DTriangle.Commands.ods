@@ -1,0 +1,31 @@
+# test script
+
+Commands
+	{
+	main
+		{
+		print { "2D Triangle test"; }
+		createWindow{640; 480; 0; }
+		createContext;
+		setResourceDirectory{"../media/"; }
+		loadResource {vsConstants; "f.16.vs_const"; }
+		setTransformClipSpaceIdentity {vsConstants;}
+		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
+
+		loadResource{vshader; "simpleVertexShader.hlsl"; }
+		loadResource{pshader; "simplePixelShader.hlsl"; }
+
+		bindResource{ vsConstants; }
+		bindResource{ vshader; }
+		bindResource{ pshader; }
+		bindResource{ swapChain; }
+
+		loadResource{mesh; "triangle.Mesh.ods"; }
+		
+
+		drawResource{ mesh; }
+
+		present;
+		sleep;
+		}
+	}

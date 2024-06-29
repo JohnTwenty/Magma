@@ -1,0 +1,6 @@
+Shader
+{
+name { simplePixelShader; } 
+profile { ps_5_0;} 
+source { "simplePixelShader.hlsl"; }
+}

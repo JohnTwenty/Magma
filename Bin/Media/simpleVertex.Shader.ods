@@ -1,0 +1,7 @@
+Shader
+{
+name { simpleVertexShader; } 
+profile { vs_5_0;} 
+vertexAttributes { POSITION; COLOR; }
+source { "simpleVertexShader.hlsl"; }
+}

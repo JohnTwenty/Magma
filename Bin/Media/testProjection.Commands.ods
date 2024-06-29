@@ -1,0 +1,48 @@
+# test script
+
+Commands
+	{
+	main
+		{
+		print { "Test Projection: 3D Mesh Rendering"; }
+		createWindow{640; 480; 0; }
+		createContext;
+		setResourceDirectory{"../media/"; }
+
+		loadResource{vshader; "simpleVertex.Shader.ods"; }
+		loadResource{pshader; "simplePixel.Shader.ods"; }
+
+		loadResource{mesh; "unitcube.Mesh.ods"; }
+
+
+		loadResource {vsConstants; "f.16.vs_const"; }
+
+		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
+
+		bindResource{ vshader; }
+		bindResource{ pshader; }
+
+		setRenderState { 0; }	#this means wireframe  (sorry, enums not supported here!)
+
+		bindKey { F5; reloadResources; }			#for now only f(void) signature commands can be bound.
+		bindKey { Escape; quit; }
+		setRenderCallback{ renderCallback;  }
+
+		appLoop;										#this is a blocking call!
+
+		}
+
+	renderCallback
+		{
+		#TODO set animated xform matrix
+		setRenderTransform {vsConstants;}
+		bindResource{ vsConstants; }	#can probably just bind this once
+
+
+		bindResource { swapChain; }
+		clearResource{ swapChain; }
+		drawResource{ mesh; }
+		present;
+		}
+
+	}

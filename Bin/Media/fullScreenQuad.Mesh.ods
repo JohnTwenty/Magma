@@ -1,0 +1,23 @@
+Mesh
+{
+name { quad; } 
+
+vertexAttributes { POSITION; }
+
+#a single triangle in clip space [(-1,-1,0)(1,1,1)] with the green (bottom right) vertex just clipped 
+vertices
+	{
+	 -1;	-1;		0.0;				
+	  1;	-1;		0.0;				
+	 -1;	 1;		0.0;				
+	  1;	 1;		0.0;				
+	}
+
+
+
+indices
+	{
+	0;		3;		1;
+	0;		2;		3;
+	}
+}
