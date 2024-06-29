@@ -38,7 +38,7 @@ bool String::endsWith(const char * pattern, unsigned length) const	//length does
 	if (data.size() > length)
 	{
 		for (unsigned i = 0; i < length; i++)
-			if (data.end()[i-length-1] != pattern[i])
+			if (data.end()[(signed)(i-length)-1] != pattern[i])
 				return false;
 
 		return true;

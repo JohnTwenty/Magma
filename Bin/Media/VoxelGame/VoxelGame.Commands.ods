@@ -1,0 +1,122 @@
+# Minecraft style Voxel game
+
+Commands
+	{
+	main						#whichever subroutine comes first here gets run by default.
+		{
+		print{ "Voxel game"; }
+		createWindow{1024; 1024; 0; }
+		createComputeContext;
+		setResourceDirectory{"../Media/VoxelGame/"; }
+		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
+
+		#loadResource{ renderTarg1; "f.rendertarget.bmp"; } #intermediate render target
+		#loadResource{ renderTarg2; "f.rendertarget.bmp"; }
+
+		bindKey { F5; reloadResources; }			#for now only f(void) signature commands can be bound.
+		bindKey { Escape; quit; }
+
+
+
+		print{ "loading voxmaps..."; }
+		#loadResource{ voxmap; "f.cornell.voxvol"; } #can use: cornell, planet, cave or fountain - built in.
+		#single virtual volume map address space for all assets
+		#has to be multiples of (64,32,32) - in compute shader we only index the tiles along x axis! Defaults to 8 bits per pixel.
+		#a asset is 32x32x32 so a 512 wide main resource gives room for 16 asset sub resources:
+		#loadResource { voxmap; "f.tiled(512 32 32).voxvol"; }	
+
+		#atlas allocator needs w and h to be the same
+		loadResource { voxmap; "f.tiled(192 192 32).voxvol"; }
+		#loadResource { voxmap; "f.tiled(128 128 32).voxvol"; }
+
+		loadSubResource { voxmap; "f.terrain(0 0 0).voxvol"; }
+		loadSubResource { voxmap; "f.terrain(32 0 0).voxvol";}
+		loadSubResource { voxmap; "f.terrain(64 0 0).voxvol";}
+		loadSubResource { voxmap; "f.terrain(0 0 32).voxvol";}
+		loadSubResource { voxmap; "f.terrain(32 0 32).voxvol";}
+		loadSubResource { voxmap; "f.terrain(64 0 32).voxvol";}
+		loadSubResource { voxmap; "f.planet.voxvol";}
+		loadSubResource { voxmap; "castle.magica.voxvol";}	
+		loadSubResource { voxmap; "deer.magica.voxvol"; }	#special size: 104x9x27, 4 frames, each 26 long
+
+
+		#loadResource{ lightmap; "f.zero(12 98304).array"; }		#12 is size of Vec3; 98304 is 32*32*32*3 - a hex has 6 faces, but each is shared between 2 neighbors. Initialize to zero.
+		#loadResource{ bouncemap1; "f.zero(12 98304).array"; }	#allocate new lightmap as bounce light destination
+
+		print{ "compiling shaders..."; }
+		loadResource{cshader; "drawWorldComputeShader.hlsl"; }
+
+		#loadResource{lightShader; "lightingComputeShader.hlsl"; }
+		#loadResource{bounceShader; "lightingBounceComputeShader.hlsl"; }
+		#loadResource{cshader; "minecraftComputeShader.hlsl"; }
+		#loadResource{aaShader; "txaaComputeShader.hlsl"; }
+
+
+		loadResource {cameraConstants; "f.16.cs_const"; }
+		bindResource { cameraConstants; }
+
+		loadResource { instanceConsts; "f.128.cs_const"; }	#size in floats, must match size in shader code, 32 byte / 8 float sized elements
+		bindResourceSlot { instanceConsts; 1; }
+
+		#loadResource { assetMapConsts; "f.96.cs_const"; }	#size in floats: 12 assets * 8 floats per asset = 96
+		#voxelGameAssetMap { assetMapConsts; }			
+
+		genAssetMap { assetMapConsts; voxmap; }				# make a lookup table about subresource placement and sizes in the global asset resource.
+		bindResourceSlot { assetMapConsts; 2; }
+
+
+		print{ "done loading!"; }
+
+		bindKey { "W"; camForward; }
+		bindKey { "A"; camLeft; }
+		bindKey { "S"; camBack; }
+		bindKey { "D"; camRight; }
+		bindKey { "Q"; camUp; }
+		bindKey { "Z"; camDown; }
+		bindMouse { mouseFunc; }
+
+		setRenderCallback{ renderCallback;  }
+
+		appLoop;												#this is a blocking call!
+		}
+
+	renderCallback	#a command sequence
+		{
+		setCommonPShaderConstants { cameraConstants; }
+		voxelGameTick { instanceConsts; }			#call C++ 
+
+		bindResource { voxmap; }					#implicit bind to slot 0
+
+		##Obsolete lighting passes - they assume world space vox volumes which is no longer true with instancing
+		###direct lighting	- turn this OFF now because it has to be redone on world scale not per object
+		#bindResourceSlot { lightmap; 1; }			#destination of direct light (output).  
+		#bindResource { lightShader; }
+		#compute{ 8; 8; 8;}	#size depends on lightmap size!
+		###bounce lighting
+		#bindResource { bounceShader; }
+		#bindResourceSlot { lightmap; 1; }			#direct light is now an input (this should be unnecessary as already bound)
+		#bindResourceSlot { bouncemap1; 2; }			#destination of the bounce 1 lightmap
+		#compute{ 8; 8; 8;}	#size depends on lightmap size!
+		#unbindResourceSlot { bouncemap1; 2; }		#have to do this otherwise DX complains of double bind on next line.
+		#now bind map that we want to use for lighting to tap 1
+		#bindResourceSlot { bouncemap1; 1; }
+
+
+		###rendering - expects voxmap slot 0, lightmap slot 1
+		bindResource { cshader; }
+
+		#bindResource { renderTarg1; }					#implicit bind to slot 0
+
+		bindResource { swapChain; }						#change to this to render without AA
+		compute{ 64; 64; 1;}										#Dispatch -- size depends on window size!
+
+		#anti aliasing pass								#We were forced out of not using double buffered swap chains because that is now legacy, and it prevents clear from working sooo...this is probably broken now.
+		#bindResource { aaShader; }
+		#bindResourceSlot { swapChain; 1; }
+		#bindResourceSlot { renderTarg2; 2; }							#dedicated history buffer
+		#compute{ 64; 64; 1;}
+
+
+		present;
+		}
+	}
