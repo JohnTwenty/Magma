@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "App\stdAfx.h"
 #include "Foundation\CommandManager.h"
 #include "Foundation\StringManager.h"
 #include "Foundation\ODBlock.h"

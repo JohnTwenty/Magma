@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "App\stdAfx.h"
 #include "Foundation\StringManager.h"
 #include "Foundation\Foundation.h"
 #include "Foundation\Allocator.h"

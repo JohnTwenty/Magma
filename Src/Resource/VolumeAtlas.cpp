@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "App\stdAfx.h"
 #include "VolumeAtlas.h"
 #include "Foundation\Foundation.h"
 

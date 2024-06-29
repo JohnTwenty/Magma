@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "App\stdAfx.h"
 #include "Foundation\MemoryManager.h"
 #include <stdlib.h>
 

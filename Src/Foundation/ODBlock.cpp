@@ -36,7 +36,7 @@
 | converted to FILE * usage.
 |
 \-------------------------------*/
-#include "stdafx.h"
+#include "App\stdafx.h"
 #include <string.h>
 #include "ODBlock.h"
 #include "Foundation.h"

@@ -1,0 +1,12 @@
+
+/Compiler/vs2019/MagmaPrototype/.vs
+/Compiler/vs2019/MagmaPrototype/Debug
+*.user
+Bin/Win64/MagmaPrototype.exe
+*.pdb
+*.obj
+*.recipe
+*.ilk
+*.log
+/Compiler/vs2019/MagmaPrototype/x64/Debug/MagmaPrototype.tlog
+*.idb

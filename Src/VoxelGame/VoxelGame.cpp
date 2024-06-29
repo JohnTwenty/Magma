@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "App\stdafx.h"
 #include "Foundation\CommandManager.h"
 #include "Foundation\VariableManager.h"
 #include "Resource\ResourceManager.h"
