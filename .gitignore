@@ -10,3 +10,6 @@ Bin/Win64/MagmaPrototype.exe
 *.log
 /Compiler/vs2019/MagmaPrototype/x64/Debug/MagmaPrototype.tlog
 *.idb
+/.vscode
+/Compiler/vs2022/MagmaPrototype/.vs
+/Compiler/vs2022/MagmaPrototype/MagmaPrototype/x64
