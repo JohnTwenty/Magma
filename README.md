@@ -1,5 +1,6 @@
 # Magma: A Simple HLSL Playground
 ![Magma VoxelGame screenshot](Magma.png)
+![Magma Particles screenshot](Magma2.png)
 
 ## Motivation
 I am a guy who used to make a living with programming.  As many programmers I eventually got invited to do full time management at my company.  I started this project to prevent my coding skills from completely atrophying.  I was a graphics programming major back at school and had a few paid gigs doing graphics programming as a student.  That was mostly in the days before real time programmable shading.  Just after the first pixel and vertex shaders were invented I abandoned graphics in favor of other topics.  Fast-forward around twenty years, and GPUs have become nearly arbitrarily programmable.  
@@ -40,8 +41,8 @@ The bin directory has all the stuff that gets executed or simply read at runtime
   * voxvol - These are [Magica Voxel](https://ephtracy.github.io/) files -- essentially voxel volumes.  Voxels are cool so of course I had to include them somehow.
 
 * The file AppMain.Commands.ods - This is essentially the autoexec.bat of the system.  Just edit this text file by uncommenting the line calling the demo you want to run.  There are a few trivially small demos that just display a triangle, texture or 3D box, but there are two bigger demos in subdirectories:
-  * Media/Particles - A sample project that implements a perhaps weird or just lazy idea for a 2D grid based fluid solver.  It kind of works.  Not really.
   * VoxelGame - a Minecraft inspired 3D environment built from a mix of procedural and Magica Voxel assets, rendered using Shadertoy style ray marching.  The graphical portion of this project used to be far more elaborate, featuring fewer bugs/artifacts, multipass lighting and even TAA, but at some point I decided that I wanted to focus on other things, so I took all of that stuff out.  I may put it back at some point in the future.
+  * Particles - A sample project that implements a perhaps weird or just lazy idea for a 2D grid based fluid solver.  It kind of works.  Not really.
 
 ## Src
 All the C++ source code, yay!  There are a few subdirectories: 
