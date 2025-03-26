@@ -68,7 +68,7 @@ void Foundation::assertViolation(const char* exp, const char* file, int line, bo
 	char c;
 	for (;;)
 		{
-		scanf_s("%c", &c);
+		scanf_s("%c", &c, (unsigned)1);
 		switch (c)
 			{
 			case 'i':

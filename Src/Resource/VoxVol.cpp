@@ -11,7 +11,6 @@
 #undef realloc
 #pragma warning( disable : 4365) //C4365: 'argument' : conversion from 'unsigned int' to 'int'
 #pragma warning( disable : 4061) //warning C4061: enumerator 'CompressionMask' in switch of enum
-#include "foundation/Px.h"
 #include "foundation/PxVec2.h"
 #include "foundation/PxMat44.h"
 #include "foundation/PxTransform.h"
@@ -40,19 +39,19 @@ VoxVol::Chunk::~Chunk()
 float hash12(PxVec2 p)
 {
 	p *= 0.1031f;
-	PxVec3 p3(p.x - floor(p.x), p.y - floor(p.y), 0.0f);
+	PxVec3 p3(p.x - floorf(p.x), p.y - floorf(p.y), 0.0f);
 	p3.z = p3.x;
-	PxVec3 q(p3.y + 33.33, p3.z + 33.33, p3.x + 33.33);
+	PxVec3 q(p3.y + 33.33f, p3.z + 33.33f, p3.x + 33.33f);
 	float d = q.dot(p3);
     p3 += PxVec3(d);
 	float k = (p3.x + p3.y) * p3.z;
-    return k - floor(k);
+    return k - floorf(k);
 }
 
 
 float noise(PxVec2 x ) 
 {
-    PxVec2 p(floor(x.x), floor(x.y));
+    PxVec2 p(floorf(x.x), floorf(x.y));
     PxVec2 f(x.x - p.x, x.y - p.y);
 	f *= 2.0f;
 	PxVec2 g(f.x * f.x * (3.0f - f.x), f.y * f.y * (3.0f - f.y));
@@ -60,15 +59,17 @@ float noise(PxVec2 x )
 	uv *= (1.0f / 256.0f); 
 	return hash12(uv);
 }
+
+
 MxU8 terrain(MxU32 x, MxU32 y, MxU32 z)	//y up
 {
-	PxVec2 p(x, z);
-	 p *= 0.02f;
+	PxVec2 p(static_cast<float>(x), static_cast<float>(z));
+	p *= 0.02f;
 
-    float f  = 0.5; 
+    float f  = 0.5f; 
     f += 0.10f*noise( p );
 	float h = 50.0f * f - 30.0f;
-	float height = (h > -25.0) ? h : -25.0f;	//terrain height (mapTerrain)
+	float height = (h > -25.0f) ? h : -25.0f;	//terrain height (mapTerrain)
 
 	if (y <= height + 5.0f)
 		return 1;
@@ -162,9 +163,9 @@ MxU8 cave(MxU32 x, MxU32 y, MxU32 z)
 
 MxU8 cornellBox(MxU32 x, MxU32 y, MxU32 z)
 {
-	int width = 12;
-	int height = 12;
-	int depth = 20;
+	unsigned width = 12;
+	unsigned height = 12;
+	unsigned depth = 20;
 
 	if (y == height && x > 5 && x < 8 && z > 14 && z < 17)	//light
 		return 10;
@@ -204,7 +205,7 @@ MxU8 sillyPlanet(MxU32 x, MxU32 y, MxU32 z) //returns 1 near origin
 	//    return (y < (4.0 * sin(x/10.0) + (3.0 * cos(z/10.0)))  ) ? 1 : 0;  
 
 	PxVec3 center(16.0f, 6.0f, 16.0f);
-	PxVec3 q(x, y, z);
+	PxVec3 q(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 	PxReal radius = 13.0f;
 
 	PxReal radius2 = 15.0f;
@@ -314,7 +315,7 @@ void VoxVol::load(const char* fullPath)
 			while (*p != 0 && *p != '(')
 				p++;
 
-			sscanf(p, "(%d %d %d)", &x, &y, &z);
+			sscanf_s(p, "(%d %d %d)", &x, &y, &z);
 		}
 
 

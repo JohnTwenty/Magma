@@ -303,7 +303,7 @@ void ResourceManager::reload(ResourceId id)
 			const void* buffer = fileManager.loadFile(fullPath, &length, false);
 
 			ODBlock odBlock;	//points into buffer
-			bool ok = odBlock.loadScript(static_cast<const char*>(buffer), length);
+			bool ok = odBlock.loadScript(static_cast<const char*>(buffer), static_cast<unsigned>(length));
 			if (!ok)
 				{
 				foundation.printLine("ResourceManager::reload(): error loading ODS: ", fullPath);
@@ -411,7 +411,7 @@ void ResourceManager::reload(ResourceId id)
 				while (*p != 0 && *p != '(')
 					p++;
 				unsigned w = 0, h = 0;
-				sscanf(p, "(%d %d)", &w, &h);
+				sscanf_s(p, "(%d %d)", &w, &h);
 				tptr = renderer.createTexture(w, h, NULL, 0, PixelFormat::e_Rf32_Gf32_Bf32_Af32);//let's default to float textures here.
 				}
 			else
@@ -469,7 +469,7 @@ void ResourceManager::reload(ResourceId id)
 				const char* p = fullPath + 7;//at least this offset until end of f.tiled.
 				while (*p != 0 && *p != '(')
 					p++;				
-				sscanf(p, "(%d %d %d)", &w, &h, &d);
+				sscanf_s(p, "(%d %d %d)", &w, &h, &d);
 				tptr = renderer.createTiledVolumeTexture(w, h, d);
 				va = new VolumeAtlas(w, h, d);
 				}
@@ -505,7 +505,7 @@ void ResourceManager::reload(ResourceId id)
 				oldr.va = va;
 				oldr.ptr = tptr;
 				}
-			else
+				else
 				{
 				//create new instance.
 				r.resourceSpecificIndex = textureResources.size();
@@ -540,7 +540,7 @@ void ResourceManager::reload(ResourceId id)
 			while (*p != 0 && *p != '(')
 				p++;				
 			unsigned structSize = 0, numElems = 0;
-			sscanf(p, "(%d %d)", &structSize, &numElems);
+			sscanf_s(p, "(%d %d)", &structSize, &numElems);
 
 			unsigned char* buffer = NULL;
 			if (clear)
@@ -584,7 +584,7 @@ void ResourceManager::reload(ResourceId id)
 			const char * fdot = strstr(fullPath, "f.");
 			if (fdot)
 				{
-				sscanf(fdot + 2, "%d", &size);
+				sscanf_s(fdot + 2, "%d", &size);
 				}
 			if (size < 1)
 			{
@@ -653,7 +653,7 @@ void ResourceManager::writeResource(ResourceId id, const void* data, size_t nByt
 			if (r.resourceSpecificIndex < textureResources.size())
 			{
 				TextureResource& res = textureResources[r.resourceSpecificIndex];
-				renderer.setBufferData(res.ptr, 1, nBytes, data);
+				renderer.setBufferData(res.ptr, 1, static_cast<unsigned>(nBytes), data);
 			}
 
 	}
@@ -742,7 +742,7 @@ ResourceId ResourceManager::genAssetMap(ResourceId id)
 				if (nFloats)
 					{
 					char descString[32];
-					sprintf(descString, "f.%d.cs_const", nFloats);	//kinda awkward :/ but I can't be bothered to make a non-string parsing based version of the below.
+					sprintf_s(descString, "f.%d.cs_const", nFloats);
 					rid = loadFromResourceDir(descString);	//caution! This could become async later! 
 					size_t size;
 					void* bytes;
@@ -820,7 +820,7 @@ void ResourceManager::loadShader(Resource &r, ODBlock & odBlock)
 			oldr.ptr = sptr;
 			//oldr.type = type;
 			}
-		else
+			else
 			{
 			//create new instance.
 			r.resourceSpecificIndex = shaderResources.size();

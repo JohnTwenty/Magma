@@ -1,15 +1,15 @@
 
-/Compiler/vs2019/MagmaPrototype/.vs
-/Compiler/vs2019/MagmaPrototype/Debug
+.vscode/
+Bin/Win64/
+Bin/Win32/
+Compiler/vs2019/MagmaPrototype/.vs/
+Compiler/vs2019/MagmaPrototype/Debug/
+Compiler/vs2019/MagmaPrototype/x64/
+Compiler/vs2022/MagmaPrototype/.vs/
+Compiler/vs2022/MagmaPrototype/MagmaPrototype/
+Compiler/vs2022/MagmaPrototype/MagmaPrototype/x64/
+Compiler/vs2022/MagmaPrototype/x64/
+External/PhysX
+External/texture-atlas/
 *.user
-Bin/Win64/MagmaPrototype.exe
-*.pdb
 *.obj
-*.recipe
-*.ilk
-*.log
-/Compiler/vs2019/MagmaPrototype/x64/Debug/MagmaPrototype.tlog
-*.idb
-/.vscode
-/Compiler/vs2022/MagmaPrototype/.vs
-/Compiler/vs2022/MagmaPrototype/MagmaPrototype/x64

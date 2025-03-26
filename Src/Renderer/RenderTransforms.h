@@ -5,7 +5,6 @@
 #undef realloc
 #pragma warning( disable : 4365) //C4365: 'argument' : conversion from 'unsigned int' to 'int'
 #pragma warning( disable : 4061) //warning C4061: enumerator 'CompressionMask' in switch of enum
-#include "foundation/Px.h"
 #include "foundation/PxMat44.h"
 #include "foundation/PxTransform.h"
 using namespace physx;

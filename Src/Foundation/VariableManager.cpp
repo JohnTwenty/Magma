@@ -85,7 +85,7 @@ unsigned VariableManager::findVariable(const char * name)
 			{
 			//this is an unused slot, create the variable here
 
-			strncpy(variables[hashIndex].name, name, maxVarLength);	//truncates to maxvarlength!
+			strncpy_s(variables[hashIndex].name, maxVarLength, name, maxVarLength - 1);
 			variables[hashIndex].name[maxVarLength - 1] = 0;	//force terminating zero in case new var is too long
 			return hashIndex;
 			}

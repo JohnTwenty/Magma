@@ -483,7 +483,7 @@ ShaderPtr RendererD3D11::createShader(const void* code, size_t length, const cha
 					(void)IncludeType; //unreferenced parameter warning
 					size_t lengthOut;
 					*ppData = fileManager.loadFile(pFileName, &lengthOut);
-					*pBytes = lengthOut;
+					*pBytes = static_cast<UINT>(lengthOut);
 					return *ppData ? 0 : ERROR_OPEN_FAILED;
 					}
 
@@ -995,7 +995,7 @@ TexturePtr RendererD3D11::createMappableBuffer(unsigned structSize, unsigned num
 	D3D11_BUFFER_DESC cd;
 	ID3D11Buffer* b;
 
-	ASSERT((type == TextureType::eCSConstantBuffer)||(type == TextureType::eVSConstantBuffer)||(type == TextureType::ePSConstantBuffer))
+	ASSERT((type == TextureType::eCSConstantBuffer) || (type == TextureType::eVSConstantBuffer) || (type == TextureType::ePSConstantBuffer));
 
 	cd.Usage = D3D11_USAGE_DYNAMIC;
 	cd.ByteWidth = structSize * numElems;

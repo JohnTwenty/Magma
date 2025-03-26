@@ -171,15 +171,15 @@ void cmdCamLeft(int down)
 
 
 
-PxQuat toQuat( float yaw, float pitch, float roll)
+PxQuat toQuat(float yaw, float pitch, float roll)
 {
     // Abbreviations for the various angular functions
-    double cy = cosf(yaw * 0.5);
-    double sy = sinf(yaw * 0.5);
-    double cp = cosf(pitch * 0.5);
-    double sp = sinf(pitch * 0.5);
-    double cr = cosf(roll * 0.5);
-    double sr = sinf(roll * 0.5);
+    float cy = cosf(yaw * 0.5f);
+    float sy = sinf(yaw * 0.5f);
+    float cp = cosf(pitch * 0.5f);
+    float sp = sinf(pitch * 0.5f);
+    float cr = cosf(roll * 0.5f);
+    float sr = sinf(roll * 0.5f);
 
     PxQuat q;
     q.w = cy * cp * cr + sy * sp * sr;

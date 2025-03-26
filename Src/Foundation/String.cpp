@@ -24,7 +24,7 @@ String String::operator+(const char * c) const	//append cstr
 		{
 		if (result.data.size() > 0)
 			result.data.popBack();	//get rid of trailing 0 string terminator.
-		result.data.append(c, strlen(c)+1);
+		result.data.append(c, static_cast<MxU32>(strlen(c))+1);
 		}
 	return result;
 }

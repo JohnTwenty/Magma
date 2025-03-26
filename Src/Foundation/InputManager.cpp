@@ -58,7 +58,7 @@ void InputManager::pumpEvents()
 			case SDL_KEYDOWN:
 			case SDL_KEYUP:
 				{
-				if (event.key.keysym.scancode < keyBindings.size() && event.key.repeat == 0)	//ignore key repeat events
+				if (static_cast<size_t>(event.key.keysym.scancode) < keyBindings.size() && event.key.repeat == 0)	//ignore key repeat events
 					if (keyBindings[event.key.keysym.scancode].commandIndex != ~0u)	//else this key is not bound
 						commandManager.callCommand(keyBindings[event.key.keysym.scancode].commandIndex, (event.type == SDL_KEYDOWN) ? 1 : 0);
 				}
@@ -84,7 +84,7 @@ void cmdBindKey(const char * keyname, const char * commandName)
 	//SDL_GetScancodeName
 	SDL_Scancode sc = SDL_GetScancodeFromName(keyname);
 	unsigned commandIndex = commandManager.findCommand(commandName);
-	if (sc < keyBindings.size() && commandIndex != ~0u)
+	if (static_cast<size_t>(sc) < keyBindings.size() && commandIndex != ~0u)
 		keyBindings[sc].commandIndex = commandIndex;
 
 	}

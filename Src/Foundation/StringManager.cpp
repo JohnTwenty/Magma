@@ -91,8 +91,9 @@ unsigned StringManager::addString(const char *str)	//returns index in table
 	int offset = sp.tryAddString(str, strLength);
 	if (offset >= 0)
 		{
-		ASSERT(offset == offset & 0x00ffffff);	//need top byte for page index.
-		return ((stringPages.size()-1)<<24)|offset;
+		unsigned offset_u = static_cast<unsigned>(offset);
+		ASSERT((offset_u & 0x00ffffff) == offset_u);	//need top byte for page index.
+		return ((stringPages.size()-1)<<24)|offset_u;
 		}
 	else
 		{
@@ -103,8 +104,9 @@ unsigned StringManager::addString(const char *str)	//returns index in table
 		StringPage &sp = stringPages.back();
 		int offset = sp.tryAddString(str, strLength);
 		ASSERT(offset != 1);	//this must have worked.
-		ASSERT(offset == offset & 0x00ffffff);	//need top byte for page index.
-		return ((stringPages.size() - 1) << 24) | offset;
+		unsigned offset_u = static_cast<unsigned>(offset);
+		ASSERT((offset_u & 0x00ffffff) == offset_u);	//need top byte for page index.
+		return ((stringPages.size() - 1) << 24) | offset_u;
 		}
 	}
 
