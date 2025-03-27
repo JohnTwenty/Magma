@@ -11,6 +11,7 @@ public:
 
 	void saveFile(const char * path, const void * buffer, size_t length, bool prependResourceDir = true);
 
+	void findMediaDirectory();
 	void setResourceDir(const char *);
 	String & getResourceDir();
 };

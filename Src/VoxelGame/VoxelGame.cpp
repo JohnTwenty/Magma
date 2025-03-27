@@ -24,9 +24,86 @@ struct Instance
 };
 
 
+/*
+* New experiment to test PhysX for deer animation
+*/
+
+using namespace physx;
+
+static PxDefaultAllocator		gAllocator;
+static PxDefaultErrorCallback	gErrorCallback;
+static PxFoundation* gFoundation = NULL;
+static PxPhysics* gPhysics = NULL;
+static PxDefaultCpuDispatcher* gDispatcher = NULL;
+static PxScene* gScene = NULL;
+static PxMaterial* gMaterial = NULL;
+static PxPvd* gPvd = NULL;
+static PxRigidDynamic* gDynamic = NULL;
+
+static PxRigidDynamic* createDynamic(const PxTransform& t, const PxGeometry& geometry, const PxVec3& velocity = PxVec3(0))
+{
+	PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
+	dynamic->setAngularDamping(0.5f);
+	dynamic->setLinearVelocity(velocity);
+	gScene->addActor(*dynamic);
+	return dynamic;
+}
+
+
+static void initPhysX()
+{
+	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
+	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	gDispatcher = PxDefaultCpuDispatcherCreate(2);
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	gScene = gPhysics->createScene(sceneDesc);
+	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+
+	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+	gScene->addActor(*groundPlane);
+	gDynamic = createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10));
+
+}
+
+static void tickPhysX()
+{
+	if (gFoundation == NULL)
+		initPhysX();
+	if (gScene)
+	{
+		gScene->simulate(1.0f / 60.0f);
+		gScene->fetchResults(true);
+	}
+
+	//get xforms:
+
+
+	/*PxU32 nbActors = gScene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
+	if (nbActors)
+	{
+		PxArray<PxRigidActor*> actors(nbActors);
+		scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<PxActor**>(&actors[0]), nbActors);
+		Snippets::renderActors(&actors[0], static_cast<PxU32>(actors.size()), true);
+	}
+	*/
+}
+void cmdVoxelGameShutdown()
+{
+	PX_RELEASE(gScene);
+	PX_RELEASE(gDispatcher);
+	PX_RELEASE(gPhysics);
+	PX_RELEASE(gFoundation);
+
+	foundation.printLine("VoxelGame cleaned up.\n");
+}
 
 void cmdVoxelGameTick(const char* scriptVar)
 {
+
+	tickPhysX();
 
 	//This is just temp testing hack, we need a proper data driven asset instance system using ODS files.
 	Instance consts[12];//we should sizecheck allocated buffer somehow!  We allocate 128 / 8 = 16 in commands.ods.  Also hardcoded in drawWorldComputeShader.
@@ -58,10 +135,24 @@ void cmdVoxelGameTick(const char* scriptVar)
 	consts[5].scaledOrientation = PxQuat(PxIdentity);
 
 	//planet:
-	consts[6].position = PxVec3(56.0f, -10.0f, 16.0f);
-	consts[6].index = 6;
-	consts[6].scaledOrientation = PxQuat(2 * 3.14159f * (gTime % 10000)*0.0001f, PxVec3(0.0f, 1.0f, 0.0f));
-	consts[6].scaledOrientation *= 0.5f;
+
+	if (gDynamic)
+	{
+		PxTransform t = gDynamic->getGlobalPose();
+		consts[6].position = t.p;
+		consts[6].index = 6;
+		consts[6].scaledOrientation = t.q;
+		consts[6].scaledOrientation *= 0.5f;
+	}
+	else
+	{
+		consts[6].position = PxVec3(56.0f, -10.0f, 16.0f);
+		consts[6].index = 6;
+		consts[6].scaledOrientation = PxQuat(2 * 3.14159f * (gTime % 10000) * 0.0001f, PxVec3(0.0f, 1.0f, 0.0f));
+		consts[6].scaledOrientation *= 0.5f;
+	}
+
+
 
 	//castle:
 	consts[7].position = PxVec3(11.0f, -20.0f, 0.0f);
@@ -69,7 +160,7 @@ void cmdVoxelGameTick(const char* scriptVar)
 	consts[7].scaledOrientation = PxQuat(3.14159f/2.0f , PxVec3(1.0f, 0.0f, 0.0f));
 	//consts[7].scaledOrientation *= 0.1f;
 
-	//deer frame 0:
+	//animating deer:
 	float animSeconds = 4.0f * (gTime % 1000) * 0.001f;
 	unsigned deerFrame = ((unsigned)animSeconds) % 4;
 	consts[8].position = PxVec3(55.0f, -6.4f, 15.0f);
@@ -106,5 +197,5 @@ void derivedAppRegisterCommands()
 {
 //commandManager.addCommand("voxelGameAssetMap", cmdVoxelGameAssetMap);
 commandManager.addCommand("voxelGameTick", cmdVoxelGameTick);
-
+commandManager.addCommand("voxelGameShutdown", cmdVoxelGameShutdown);
 }

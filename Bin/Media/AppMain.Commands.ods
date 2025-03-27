@@ -1,0 +1,21 @@
+# This basically choses which app to run.
+
+Commands
+	{
+	main
+		{
+		## Uncomment the line(s) to run.
+		#compute shaders
+		runCommands { "VoxelGame/VoxelGame.Commands.ods"; }
+		#runCommands { "Particles/Physics.Commands.ods"; }
+		#runCommands { "ComputeToyImage.Commands.ods"; }
+		#runCommands { "ComputeToyInteractive.Commands.ods"; }
+
+		#vertex and pixel shader based stuff
+		#runCommands { "test2DTriangle.Commands.ods"; }
+		#runCommands { "testProjection.Commands.ods"; }
+		#runCommands { "ShaderToy.Commands.ods"; }
+        #runCommands { "testTex22DTriangle.Commands.ods"; }	
+		}
+
+	}

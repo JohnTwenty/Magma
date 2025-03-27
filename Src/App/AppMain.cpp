@@ -31,6 +31,7 @@ extern "C" FILE * __cdecl __iob_func(void)
 #pragma warning(pop)
 
 #include "Foundation\Foundation.h"
+#include "Foundation\FileManager.h"
 #include "Foundation\CommandManager.h"
 #include "Foundation\TaskManager.h"
 #include "Foundation\StringManager.h"
@@ -266,6 +267,9 @@ int main(int /*argc*/, char** /*argv*/)
 	{
 	_CrtSetAllocHook(crtAllocHook);
 
+	//switch cwd to media directory
+	fileManager.findMediaDirectory();
+
 	//register commands of all classes	TODO: the app should not have to do this.  Can't this just happen in module ctor?
 	foundation.registerCommands();
 	inputManager.registerCommands();
@@ -297,7 +301,7 @@ int main(int /*argc*/, char** /*argv*/)
 	derivedAppRegisterCommands();
 
 
-	cmdRunCommands("../AppMain.Commands.ods");
+	cmdRunCommands("AppMain.Commands.ods");
 
 
 	taskManager.shutDown();

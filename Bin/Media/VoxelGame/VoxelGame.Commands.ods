@@ -7,7 +7,7 @@ Commands
 		print{ "Voxel game"; }
 		createWindow{1024; 1024; 0; }
 		createComputeContext;
-		setResourceDirectory{"../Media/VoxelGame/"; }
+		setResourceDirectory{"VoxelGame/"; }
 		loadResource{ swapChain; "f.swapchain.bmp"; }	#f. means its not a file but done with code 
 
 		#loadResource{ renderTarg1; "f.rendertarget.bmp"; } #intermediate render target
@@ -78,6 +78,7 @@ Commands
 		setRenderCallback{ renderCallback;  }
 
 		appLoop;												#this is a blocking call!
+		voxelGameShutdown;
 		}
 
 	renderCallback	#a command sequence

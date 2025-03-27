@@ -11,10 +11,30 @@
 #pragma warning(pop)
 
 #include <sys/stat.h>			//for last time file modified
+#include "windows.h"			//needed for findMediaDirectory()
 
 
 String								resourceDir;
 
+void FileManager::findMediaDirectory()
+{
+	//change the CWD to the media directory.
+	//SDL doesn't let us change CWD so we need to do this nonportably.
+	for (;;)
+	{
+		if (!SetCurrentDirectoryA("Media"))
+		{
+			if (!SetCurrentDirectoryA(".."))
+			{
+				foundation.fatal("FileManager::findMediaDirectory():Cannot find Media directory!");
+			}
+		}
+		else
+			return;
+	}
+
+
+}
 
 const void* FileManager::loadFile(const char* path, size_t* lengthOut, bool prependResourceDir)
 {
