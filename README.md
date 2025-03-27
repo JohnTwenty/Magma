@@ -23,12 +23,12 @@ So with these goals established, I went to work.  I started this project late Oc
 ### External 
 First, as every project these days, we have some annoying external dependencies in the External folder.  The most important is [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2).  Because I use an ancient version of SDL and cannot be bothered to upgrade, I put a binary distro here just in case they stop hosting old distros and so you don't have to build this relatively large project from source.  I also have the [SDL Image](https://github.com/libsdl-org/SDL_image) library taken care of in the same way for the same reasons.  SDL and SDL Image are used to abstract some basic and uninteresting operating system / GUI capabilities in a portable way.
 
-[NVIDIA PhysX SDK](https://github.com/NVIDIA-Omniverse/PhysX.git): I was planning to add a PhysX simulation example from the beginning but for some reason but never got around to it.  I am however already stealing the 3D linear algebra and basic type system from PhysX which makes this dependency necessary.  I am only using the PhysX headers and not any of their libraries, so you just need to clone down PhysX into the respective directory, you don't actually need to build it.  I provided a handy batch file for cloning it.  Unfortunately the NVIDIA PhysX team decided to drop support for 32 bit builds which in turn breaks Magma's otherwise amazing 32 bit support.
+[NVIDIA PhysX SDK](https://github.com/NVIDIA-Omniverse/PhysX.git): I use PhysX simulation, so you need to clone down PhysX into the respective directory, and build it.  I provided a handy batch file for cloning it, and another one for moving the PhysX (and SDL) DLLs after the PhysX build into the correct places next to the Magma executables.
 
 [Texture Atlas](https://github.com/JohnnyonFlame/texture-atlas.git): A very simple 2D texture atlas library I found and used to write a 3D texture atlas.  Also cloned by the batch file.
 
 ## Compiler
-I provide Visual Studio 2019 and 2022 solution and project files.  After you clone the two above outstanding dependencies you should just be able to open one of the solution files in a free community edition of Visual Studio and hit build.  You want to use Debug or Release for the 64 bit configuration.  As I said above, the 32 bit version won't build any longer because of silly 64-bit only PhysX.  
+I provide Visual Studio 2022 solution and project files.  After you clone the two above outstanding dependencies you should just be able to open one of the solution files in a free community edition of Visual Studio and hit build.  You want to use Debug or Release for the 64 bit configuration.
 
 ## Bin
 The bin directory has all the stuff that gets executed or simply read at runtime.  We have the following subdirectories here:
