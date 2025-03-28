@@ -5,7 +5,7 @@ Texture3D<uint> map  : register(t0);	//we use 8bpp textures but that isn't suppo
 #include "../raytrace2.hlsl"
 
 RWTexture2D<float4> outputImage  : register(u0);
-RWStructuredBuffer<float3> lighting : register(u1);	//3 faces per voxel (the 3 other faces belong to the next voxels)
+//RWStructuredBuffer<float3> lighting : register(u1);	//3 faces per voxel (the 3 other faces belong to the next voxels)
 
 //TODO: this needs to be dynamic somehow
 #define NUM_INSTANCES 128			//must match number of instances in VoxelGame.cpp and cbuffer size declaration VoxelGame.Commands.ods
@@ -28,10 +28,12 @@ struct Instance
 	float4 scaledOrientation;
 };
 
-cbuffer Instances : register(b1)
-{
-	Instance instances[NUM_INSTANCES];
-};
+//cbuffer Instances : register(b1)
+//{
+//	Instance instances[NUM_INSTANCES];
+//};
+
+RWStructuredBuffer<Instance> instances : register(u2);  
 
 struct AssetLocation	
 {
@@ -65,8 +67,9 @@ float3 quatRotate(float4 q, float3 v)
 
 }
 
+
 // axis aligned box centered at the origin, with size halfBounds; https://iquilezles.org/articles/intersectors/
-float rayVsAABB( float3 ro, float3 rd, float3 halfBounds, out float tnear, out float tfar) 
+bool rayVsAABB( float3 ro, float3 rd, float3 halfBounds, out float tnear, out float tfar) 
 {
     float3 m = 1.0/rd;
     float3 n = m*ro;
@@ -75,9 +78,10 @@ float rayVsAABB( float3 ro, float3 rd, float3 halfBounds, out float tnear, out f
     float3 t2 = -n + k;
     tnear = max( max( t1.x, t1.y ), t1.z );//t near clip
     tfar = min( min( t2.x, t2.y ), t2.z );//t along ray far clip
-    if( tnear>tfar || tfar<0.0) return 0.6; // no intersection
-	return 1.0;
+    return (!(tnear > tfar || tfar < 0.0));
 }
+
+
 
 
 [numthreads(16, 16, 1)] //hardcoded to be used with 64x64 dispatch with 16x64 = 1024 ^2 OutputImage.
@@ -120,7 +124,7 @@ void main (uint3 threadId: SV_DispatchThreadID )
 
 	[loop] for (int inst = 0; inst < NUM_INSTANCES; inst++)	//instances of voxel assets
 	{
-		int assetIndex = instances[inst].index;
+		int assetIndex = instances[inst].index;	//the cost of this shader is dominated by the cost of they dynamic read access of instances.
 
 		if (assetIndex < 0)
 			break;
@@ -141,7 +145,7 @@ void main (uint3 threadId: SV_DispatchThreadID )
 
 
 		//decide if ray hits voxvol local space BOUNDS / world space OBB
-		float boxhit = rayVsAABB(rayOriginL, rayDirL, assetMap[assetIndex].dims * 0.5 * scale, tnear, tfar);
+		bool boxhit = rayVsAABB(rayOriginL, rayDirL, assetMap[assetIndex].dims * 0.5 * scale, tnear, tfar);
 		if (boxhit == 1.0)
 		{
 			skyDebug = 1.0;

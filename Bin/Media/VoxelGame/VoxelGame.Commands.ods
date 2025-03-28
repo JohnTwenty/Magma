@@ -54,9 +54,8 @@ Commands
 
 		loadResource {cameraConstants; "f.16.cs_const"; }
 		bindResource { cameraConstants; }
-
-		loadResource { instanceConsts; "f.1024.cs_const"; }	#size in floats, must match size in shader code, and voxelGame.cpp
-		bindResourceSlot { instanceConsts; 1; }
+		loadResource { instancesSB; "f.uninit(32 128).array"; }	#try as structured buffer
+		bindResourceSlot { instancesSB; 2; }
 
 		#loadResource { assetMapConsts; "f.96.cs_const"; }	#size in floats: 12 assets * 8 floats per asset = 96
 		#voxelGameAssetMap { assetMapConsts; }			
@@ -84,9 +83,9 @@ Commands
 	renderCallback	#a command sequence
 		{
 		setCommonPShaderConstants { cameraConstants; }
-		voxelGameTick { instanceConsts; }			#call C++ 
+		voxelGameTick { instancesSB; }			#call C++ function to update the structured buffer
 
-		bindResource { voxmap; }					#implicit bind to slot 0
+		bindResourceSlot { voxmap; 0; }	
 
 		##Obsolete lighting passes - they assume world space vox volumes which is no longer true with instancing
 		###direct lighting	- turn this OFF now because it has to be redone on world scale not per object

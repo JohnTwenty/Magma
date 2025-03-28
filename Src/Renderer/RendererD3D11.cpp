@@ -366,8 +366,12 @@ TexturePtr RendererD3D11::createRenderTarget()
 
 void RendererD3D11::present()
 	{
-//++frameCount;
-	UINT vSync = 1;	//1 or 0
+//we need to unbind the structured buffer before presenting to avoid a warning from DX
+    ID3D11UnorderedAccessView* nullView = nullptr;
+    deviceContext->CSSetUnorderedAccessViews(0, 1, &nullView, nullptr);
+    		
+
+	UINT vSync = 0;	//1 or 0
 	swapChain->Present(vSync, 0);
 	}
 
@@ -715,7 +719,7 @@ void RendererD3D11::releaseGeometryArray(GeometryArray rm)
 
 void RendererD3D11::setBufferData(TexturePtr tpr, unsigned structSize, unsigned numElems, const void* data)
 	{
-	if ((tpr.type == TextureType::eCSConstantBuffer)||(tpr.type == TextureType::eVSConstantBuffer)||(tpr.type == TextureType::ePSConstantBuffer))
+	if ((tpr.type == TextureType::eCSConstantBuffer) || (tpr.type == TextureType::eVSConstantBuffer) || (tpr.type == TextureType::ePSConstantBuffer))
 		{
 		D3D11_MAPPED_SUBRESOURCE sr;
 		if (FAILED(deviceContext->Map(tpr.texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &sr)))
@@ -726,9 +730,13 @@ void RendererD3D11::setBufferData(TexturePtr tpr, unsigned structSize, unsigned 
 		memcpy(sr.pData, data, structSize * numElems);
 		deviceContext->Unmap(tpr.texture, 0);
 		}
+	else if (tpr.type == TextureType::eComputeBuffer)
+		{
+		// For structured buffers, we can use UpdateSubresource directly
+		deviceContext->UpdateSubresource(tpr.texture, 0, nullptr, data, structSize * numElems, 0);
+		}
 	else
 		foundation.printLine("RendererD3D11::setConstants(): unexpected buffer type!");
-
 	}
 
 

@@ -649,6 +649,7 @@ void ResourceManager::writeResource(ResourceId id, const void* data, size_t nByt
 		if ((r.type == ResourceType::eCS_CONST)
 			||(r.type == ResourceType::ePS_CONST)
 			||(r.type == ResourceType::eVS_CONST)
+			||(r.type == ResourceType::eARRAY)
 			)
 			if (r.resourceSpecificIndex < textureResources.size())
 			{
