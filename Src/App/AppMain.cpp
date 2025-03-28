@@ -95,14 +95,27 @@ PxVec3 camVelBodySpace(PxZero);
 
 void cmdAppLoop()
 	{
+	static unsigned lastTimeFPSWrite = 0;
+	static unsigned gFrameCount = 0;
 	for (;;)
 		{
 		//timing
 		gTime = SDL_GetTicks();	
 
-		if (gTime > (gLastMoveTime + 20))//update at 50hz
+		if (gTime > (gLastMoveTime + 15))//update at just over 60hz
 			{
 			gLastMoveTime = gTime;
+			gFrameCount++;
+
+			//update fps counter
+			if (gTime > (lastTimeFPSWrite + 1000))
+				{
+				lastTimeFPSWrite = gTime;
+				char title[64];
+				sprintf_s(title, "Magma - %d FPS", gFrameCount);
+				SDL_SetWindowTitle(renderer.getWin(), title);
+				gFrameCount = 0;
+				}
 
 			//update camera
 

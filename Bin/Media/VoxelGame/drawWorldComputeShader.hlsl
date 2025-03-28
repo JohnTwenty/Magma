@@ -8,7 +8,7 @@ RWTexture2D<float4> outputImage  : register(u0);
 RWStructuredBuffer<float3> lighting : register(u1);	//3 faces per voxel (the 3 other faces belong to the next voxels)
 
 //TODO: this needs to be dynamic somehow
-#define NUM_INSTANCES 12
+#define NUM_INSTANCES 128			//must match number of instances in VoxelGame.cpp and cbuffer size declaration VoxelGame.Commands.ods
 #define NUM_ASSETS 12
 
 cbuffer Constants : register(b0)	//set by cmdSetCommonPShaderConstants
@@ -171,6 +171,7 @@ void main (uint3 threadId: SV_DispatchThreadID )
 			int materialhit;
 
 			//local space ray march through asset
+			tfar = min(t, tfar); //do not trace beyond closest hit so far.
 			float thit = raymarchVoxVol(rayOriginClipL, rayDirClipL, 250, tfar, currCellGhit, hitNormalInstLi, materialhit);//ray from eye into world.  Doesn't have to be normalized for this call.
 			if (thit + tnear < t)//closer than last instance hit?
 			{

@@ -100,13 +100,16 @@ void cmdVoxelGameShutdown()
 	foundation.printLine("VoxelGame cleaned up.\n");
 }
 
-void cmdVoxelGameTick(const char* scriptVar)
+void cmdVoxelGameTick(const char* scriptVar)	//scriptVar is the handle to constant buffer resource.
 {
 
 	tickPhysX();
 
 	//This is just temp testing hack, we need a proper data driven asset instance system using ODS files.
-	Instance consts[12];//we should sizecheck allocated buffer somehow!  We allocate 128 / 8 = 16 in commands.ods.  Also hardcoded in drawWorldComputeShader.
+	const unsigned nInstanceSlots = (1024 * sizeof(float)) / sizeof(Instance);	//We allocate this const size in floats in commands.ods.  Also hardcoded in drawWorldComputeShader.
+	Instance consts[nInstanceSlots];//we should sizecheck allocated buffer somehow!  
+
+	//we should sizecheck allocated buffer somehow!  We allocate 1024 / 8 = 128 in commands.ods.  Also hardcoded in drawWorldComputeShader.
 
 	//terrain:
 	consts[0].position = PxVec3(0.0f, -20.0f, 0.0f);
@@ -168,27 +171,28 @@ void cmdVoxelGameTick(const char* scriptVar)
 	consts[8].scaledOrientation = PxQuat(3.14159f/2.0f , PxVec3(1.0f, 0.0f, 0.0f));
 	consts[8].scaledOrientation *= 0.15f;
 
-	//deer frame 1:
-	consts[9].position = PxVec3(22.0f, -10.0f, 5.0f);
-	consts[9].index = 9;
-	consts[9].scaledOrientation = PxQuat(PxIdentity);
-	consts[9].scaledOrientation *= 0.15f;
+	//stress test -- add 100 more planet instances: 
+	unsigned nPlanets = 100;
 
-	//deer frame 2:
-	consts[10].position = PxVec3(22.0f, -10.0f, 10.0f);
-	consts[10].index = 10;
-	consts[10].scaledOrientation = PxQuat(PxIdentity);
-	consts[10].scaledOrientation *= 0.15f;
+	for (unsigned i = 0; i < nPlanets; i++)
+	{
+		consts[9 + i].position = PxVec3(56.0f + (i / 10) * 10.0f, -10.0f, 16.0f + (i % 10) * 10.0f);
+		consts[9 + i].index = 6;
+		consts[9 + i].scaledOrientation = PxQuat(2 * 3.14159f * (gTime % 10000) * 0.0001f, PxVec3(0.0f, 1.0f, 0.0f));
+		consts[9 + i].scaledOrientation *= 0.5f;
+	}
 
-	//deer frame 3:
-	consts[11].position = PxVec3(22.0f, -10.0f, 15.0f);
-	consts[11].index = 11;
-	consts[11].scaledOrientation = PxQuat(PxIdentity);
-	consts[11].scaledOrientation *= 0.15f;
+
+	//sentinel for end of buffer:
+	consts[nPlanets + 9].index = -1;
+
+	unsigned nInstances = 10 + nPlanets;	//include sentinel!
+
+	ASSERT(nInstances <= nInstanceSlots);
 
 	//store as shader buffer:
 	ResourceId rid = static_cast<unsigned>(variableManager.getVariableAsInt(scriptVar));
-	resourceManager.writeResource(rid, consts, sizeof(Instance) * 12);
+	resourceManager.writeResource(rid, consts, sizeof(Instance) * nInstances);
 
 }
 

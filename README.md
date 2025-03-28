@@ -19,6 +19,47 @@ I thought (and still think!) that writing shaders in Shadertoy was very, very co
 
 So with these goals established, I went to work.  I started this project late October 2013 as my personal Mercurial source control tells me.  And I worked on it very sporadically because I am very lazy.  Today in July 2023 as I write this, this Mercurial repo is on revision number 138.  That is something like, what, 13 changes per year, around one change per month?  Anyway, in the meantime the world nearly forgot about Mercurial and all the cool kids are putting their code on GitHub.  I want to be a cool old man, so I thought it is time to put this old thing online.  
 
+## Requirements
+- Windows 10 or later
+- Visual Studio 2022 (Community Edition is fine)
+- DirectX 11 compatible GPU
+- Git (for cloning dependencies)
+
+## Installation
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/JohnTwenty/Magma.git
+   cd Magma
+   ```
+
+2. Clone the required dependencies; use External/Clone_Externals.bat or
+   ```bash
+   # Clone PhysX
+   git clone https://github.com/NVIDIA-Omniverse/PhysX.git External/PhysX
+   
+   # Clone Texture Atlas
+   git clone https://github.com/JohnnyonFlame/texture-atlas.git External/texture-atlas
+   ```
+
+3. Build PhysX:
+   - Open `External/PhysX/compiler/vs2022/PhysXSDK.sln` in Visual Studio 2022
+   - Build the solution at least in Checked and Debug configurations for x64
+   - Run the provided batch file to copy DLLs to the correct location:
+     ```bash
+     cd External
+     Copy_DLLs_To_Bin.bat
+     ```
+
+4. Build Magma:
+   - Open `Magma.sln` in Visual Studio 2022
+   - Select Debug or Release configuration
+   - Build the solution
+
+5. Run the demos:
+   - Navigate to the `bin/Media` directory
+   - Edit `AppMain.Commands.ods` to uncomment the demo you want to run
+   - Run the executable
+
 ## What Are All These Files
 ### External 
 First, as every project these days, we have some annoying external dependencies in the External folder.  The most important is [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2).  Because I use an ancient version of SDL and cannot be bothered to upgrade, I put a binary distro here just in case they stop hosting old distros and so you don't have to build this relatively large project from source.  I also have the [SDL Image](https://github.com/libsdl-org/SDL_image) library taken care of in the same way for the same reasons.  SDL and SDL Image are used to abstract some basic and uninteresting operating system / GUI capabilities in a portable way.

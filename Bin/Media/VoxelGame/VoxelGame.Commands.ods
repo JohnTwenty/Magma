@@ -55,7 +55,7 @@ Commands
 		loadResource {cameraConstants; "f.16.cs_const"; }
 		bindResource { cameraConstants; }
 
-		loadResource { instanceConsts; "f.128.cs_const"; }	#size in floats, must match size in shader code, 32 byte / 8 float sized elements
+		loadResource { instanceConsts; "f.1024.cs_const"; }	#size in floats, must match size in shader code, and voxelGame.cpp
 		bindResourceSlot { instanceConsts; 1; }
 
 		#loadResource { assetMapConsts; "f.96.cs_const"; }	#size in floats: 12 assets * 8 floats per asset = 96

@@ -141,7 +141,6 @@
     <ClCompile Include="..\..\..\Src\VoxelGame\VoxelGame.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Bin\AppMain.Commands.ods" />
     <None Include="..\..\..\Bin\Media\VoxelGame.Commands.ods" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
