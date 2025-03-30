@@ -21,15 +21,15 @@ public:
 
 
 
-	bool findSpace(unsigned w, unsigned h, unsigned d, unsigned & x, unsigned & y, unsigned & z);	//true on success.  Already allocates the space in the map.
+	int findSpace(unsigned w, unsigned h, unsigned d, unsigned & x, unsigned & y, unsigned & z);	//returns the index of the allocated space or -1 if no space was found.
 	unsigned getAssetMapSizeInFloats();//get the size of the buffer in floats that genAssetMap() will fill when subsequently called.
 	void* genAssetMap(size_t & sizeInBytes);	//returns a buffer (as a void *) that has the xyz_pad and whd_pad dwords of all allocated subtextures, in the order of allocation.  Don't call this if getAssetMapSizeInFloats() returns 0.
 	//deallocation is not needed
 
 private: 
-	Slab* findSlab(unsigned w, unsigned h, unsigned d, unsigned& x, unsigned& y, unsigned& z);		//find a slab to store this size, taking into account the tolerance.
+	int findSlab(unsigned w, unsigned h, unsigned d, unsigned& x, unsigned& y, unsigned& z);		//find a slab to store this size, taking into account the tolerance.
 	Slab* allocSlab(unsigned w, unsigned h);
-	bool allocInSlab(Slab *, unsigned d, unsigned & x, unsigned & y, unsigned & z);
+	int allocInSlab(Slab *, unsigned d, unsigned & x, unsigned & y, unsigned & z);//returns the index of the allocated space or -1 if no space was found.
 
 
 	unsigned atlasW, atlasH, atlasD; 

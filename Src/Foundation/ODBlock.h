@@ -116,21 +116,16 @@ class ODBlock
 	//queries:  return true in success
 	ODBlock * getBlock(const char * identifier,bool bRecursiveSearch=false);	//returns block with given identifier, or NULL.
 
+	//iterating:
 	void reset();								//prepares to get first terminal or sub block of current block
-
-	//getting terminals:
+	bool moreSubBlocks();						//returns true if more sub blocks (including terminals) are available
+	ODBlock * nextSubBlock();					//returns a pointer to the next sub block.  
 	bool moreTerminals();						//returns true if more terminals are available
 	const char * nextTerminal();				//returns a pointer to the next immediate terminal child of current block's identifier string.  
 	//casting alternatives:						only call these if moreTerminals() was true!!
 	int nextTerminalAsInt();
 	float nextTerminalAsFloat();
 	bool nextTerminalAsBool();
-
-
-
-	//getting terminals:
-	bool moreSubBlocks();						//returns true if more sub blocks (including terminals) are available
-	ODBlock * nextSubBlock();					//returns a pointer to the next sub block.  
 
 	// hig level macro functs, return true on success: (call for obj containing:)
 	bool getBlockInt(const char * ident, int* p = 0, unsigned count = 1);	//reads blocks of form:		ident{ 123;}

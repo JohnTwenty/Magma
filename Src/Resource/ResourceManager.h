@@ -44,7 +44,7 @@ public:
 	ResourceId loadFromResourceDir(const char * path);	//works for all resource types.  Works relative to resource directory.	This talks directly to the renderer because
 														//the idea is that the resource manager transparently loads and unloads stuff like shaders on demand.
 
-	void loadSubResource(ResourceId, const char* path);
+	unsigned loadVolumeIntoAtlas(ResourceId, const char* path, unsigned & firstFrameIndex);	//resource id is the eVOX_VOL volume atlas texture resource. Path is the voxvol file. Returns number of animation frames loaded. firstFrameIndex is first of a continuous set of indices into the Volume Atlas.
 	ResourceId genAssetMap(ResourceId texWithAtlas);	//generates a GPU loadable const resource that acts as a lookup table from asset indices to subresource bounds.
 	ResourceType::Enum getResourceType(ResourceId);
 	void reloadAll();

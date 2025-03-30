@@ -2,6 +2,9 @@
 
 class String;
 
+// Define the callback function type
+typedef void (*FileCallback)(const char* filename);
+
 class FileManager
 {
 public:
@@ -14,6 +17,9 @@ public:
 	void findMediaDirectory();
 	void setResourceDir(const char *);
 	String & getResourceDir();
+
+	// New method to iterate through files matching a pattern
+	bool iterateFiles(const char* pattern, FileCallback callback, bool prependResourceDir = true);
 };
 
 

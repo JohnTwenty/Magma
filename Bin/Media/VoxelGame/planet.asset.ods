@@ -1,0 +1,9 @@
+Asset
+    {
+    voxvol { "f.planet.voxvol";}	
+    physics
+        {
+        collider { sphere; }
+
+        }
+    }

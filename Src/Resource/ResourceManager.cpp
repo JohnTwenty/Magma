@@ -152,7 +152,8 @@ void cmdLoadResource(const char * scriptVar, const char * file)
 void cmdloadSubResource(const char* scriptVar, const char* file)
 {
 	ResourceId r = static_cast<unsigned>(variableManager.getVariableAsInt(scriptVar));
-	resourceManager.loadSubResource(r, file);
+	unsigned firstFrameIndex = 0;
+	resourceManager.loadVolumeIntoAtlas(r, file, firstFrameIndex);
 }
 
 void cmdBindResource(const char * scriptVar)
@@ -674,12 +675,12 @@ ResourceId ResourceManager::loadFromResourceDir(const char * path)
 	return id;
 	}
 
-void ResourceManager::loadSubResource(ResourceId id, const char* path)
+unsigned ResourceManager::loadVolumeIntoAtlas(ResourceId id, const char* path, unsigned & firstFrameIndex)
 	{
 	if (id >= resources.size())
 		{
-		foundation.printLine("ResourceManager::loadSubResource():invalid resource id.");
-		return;
+		foundation.printLine("ResourceManager::loadVolumeIntoAtlas():invalid resource id.");
+		return 0;
 		}
 	Resource & r = resources[id];
 
@@ -691,32 +692,45 @@ void ResourceManager::loadSubResource(ResourceId id, const char* path)
 		case ResourceType::eVOX_VOL:
 			{
 			ASSERT(r.resourceSpecificIndex < textureResources.size());
-			TextureResource& res = textureResources[r.resourceSpecificIndex];
+			TextureResource& res = textureResources[r.resourceSpecificIndex];	//a single texture resource (volume atlas) is shared between all subresources and all its chunks (frames) of the volume.
+			VolumeAtlas * va = res.va;
+
+			if (!va)
+			{	
+				foundation.printLine("ResourceManager::loadVolumeIntoAtlas():cannot use on atlas-less resource.");
+				return 0;
+			}
+
 			TexturePtr tptr = res.ptr;
 			VoxVol volume;
 			String fullPath = fileManager.getResourceDir() + path;
 
 			volume.load(fullPath);
-
 			unsigned numChunks = volume.getNumChunks();
+			unsigned numChunksLoaded = 0;
+			int volumeAtlasIndex = -1;
 
 			for (unsigned i = 0; i < numChunks; i++)
 				{
 				unsigned char* data = volume.lockChunkForRead(i);
 				unsigned x = 0, y = 0, z = 0;
-				if (!res.va)
-					foundation.printLine("ResourceManager::loadSubResource():cannot use on atlas-less resource.");
-				else if (res.va->findSpace(volume.getChunkWidth(i), volume.getChunkHeight(i), volume.getChunkDepth(i), x, y, z))
+				//we rely on the fact that the volume atlas allocates the indices consecutively.
+				volumeAtlasIndex = res.va->findSpace(volume.getChunkWidth(i), volume.getChunkHeight(i), volume.getChunkDepth(i), x, y, z);
+				if (volumeAtlasIndex != -1)
+					{
 					renderer.writeToTiledVolumeTexture(tptr, x, y, z, volume.getChunkWidth(i), volume.getChunkHeight(i), volume.getChunkDepth(i), data);
+					numChunksLoaded++;
+					}
 				else
-					foundation.printLine("ResourceManager::loadSubResource():cannot find space for subResource.");
+					foundation.printLine("ResourceManager::loadVolumeIntoAtlas():cannot find space for subResource.");
 				volume.unlockChunk();
 				}
-
+			firstFrameIndex = volumeAtlasIndex - numChunksLoaded + 1;
+			return numChunksLoaded;
 			}
-		break;
 		default:
-			foundation.printLine("ResourceManager::loadSubResource():invalid resource type.");
+			foundation.printLine("ResourceManager::loadVolumeIntoAtlas():invalid resource type.");
+			return 0;
 		}
 	}
 
@@ -750,6 +764,10 @@ ResourceId ResourceManager::genAssetMap(ResourceId id)
 					bytes = textureResources[r.resourceSpecificIndex].va->genAssetMap(size);
 					writeResource(rid, bytes, size);
 					}
+					else
+					{
+						foundation.printLine("ResourceManager::genAssetMap():cannot generate asset map for empty resource.");
+					}	
 				}
 			}
 		break;

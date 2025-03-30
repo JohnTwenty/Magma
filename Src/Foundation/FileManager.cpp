@@ -13,7 +13,6 @@
 #include <sys/stat.h>			//for last time file modified
 #include "windows.h"			//needed for findMediaDirectory()
 
-
 String								resourceDir;
 
 void FileManager::findMediaDirectory()
@@ -63,7 +62,6 @@ void FileManager::unloadFile(const void* buffer)
 
 bool FileManager::wasModifiedSince(const char* path, time_t lastTime, time_t* newTimeOut, bool prependResourceDir)
 {
-	//String fname = resourceDir + sourceFile;
 	struct stat result;
 	if (stat(prependResourceDir ? (resourceDir + path) : path, &result) == 0)
 	{
@@ -97,6 +95,31 @@ void FileManager::setResourceDir(const char* d)
 String & FileManager::getResourceDir()
 {
 return resourceDir;
+}
+
+bool FileManager::iterateFiles(const char* pattern, FileCallback callback, bool prependResourceDir)
+{
+	String searchPath = prependResourceDir ? (resourceDir + pattern) : pattern;
+	
+	WIN32_FIND_DATAA findData;
+	HANDLE hFind = FindFirstFileA(searchPath, &findData);
+	
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+
+	do
+	{
+		// Skip directories
+		if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			callback(findData.cFileName);
+		}
+	} while (FindNextFileA(hFind, &findData));
+
+	FindClose(hFind);
+	return true;
 }
 
 FileManager gFileManager;

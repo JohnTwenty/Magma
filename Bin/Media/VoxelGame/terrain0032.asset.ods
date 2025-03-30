@@ -1,0 +1,9 @@
+Asset
+    {
+    voxvol { "f.terrain(0 0 32).voxvol";}	
+    physics
+        {
+        collider { aabb; }
+
+        }
+    }

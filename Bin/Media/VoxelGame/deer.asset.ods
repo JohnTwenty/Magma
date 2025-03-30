@@ -1,0 +1,9 @@
+Asset
+    {
+    voxvol { "deer.magica.voxvol";}	
+    physics
+        {
+        collider { aabb; }
+
+        }
+    }

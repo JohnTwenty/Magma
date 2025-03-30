@@ -80,19 +80,19 @@ VolumeAtlas::~VolumeAtlas()
 	}
 }
 
-Slab* VolumeAtlas::findSlab(unsigned w, unsigned h, unsigned d, unsigned& x, unsigned& y, unsigned& z)
+int VolumeAtlas::findSlab(unsigned w, unsigned h, unsigned d, unsigned& x, unsigned& y, unsigned& z)
 {
 	for (Slab* s = slabs.begin(); s < slabs.end(); s++)
 	{
 		if (s->isFitFor(w, h, tolerance))
 		{
 			//try to find space in this pre-existing slab.
-			if (allocInSlab(s, d, x, y, z))
-
-			return s;
+			unsigned index = allocInSlab(s, d, x, y, z);
+			if (index != -1)
+				return index;
 		}
 	}
-	return NULL;
+	return -1;
 }
 
 
@@ -122,7 +122,7 @@ Slab* VolumeAtlas::allocSlab(unsigned w, unsigned h)
 	return &slabs.pushBack(Slab(id, xywh[0], xywh[1], w, h));
 }
 
-bool VolumeAtlas::allocInSlab(Slab* s, unsigned d, unsigned& x, unsigned& y, unsigned& z)
+int VolumeAtlas::allocInSlab(Slab* s, unsigned d, unsigned& x, unsigned& y, unsigned& z)
 {
 	unsigned depthRemaining = atlasD - s->usedTillDepth;
 	if (depthRemaining >= d)
@@ -137,39 +137,38 @@ bool VolumeAtlas::allocInSlab(Slab* s, unsigned d, unsigned& x, unsigned& y, uns
 		ASSERT(s->usedTillDepth <= atlasD);
 
 		assetMap.pushBack(AssetLocation(x, y, z, s->width, s->height, d));
-		return true;
+		return assetMap.size() - 1;
 	}
 	else
-		return false;
+		return -1;
 }
 
 
-bool VolumeAtlas::findSpace(unsigned w, unsigned h, unsigned d, unsigned& x, unsigned& y, unsigned& z)	//true on success.  Already allocates the space in the map.
+int VolumeAtlas::findSpace(unsigned w, unsigned h, unsigned d, unsigned& x, unsigned& y, unsigned& z)	//true on success.  Already allocates the space in the map.
 {
 
 	if (w > atlasW || h > atlasH || d > atlasD)
 	{
 		foundation.printLine("VolumeAtlas::findSpace(): cannot allocate space larger than atlas dims.");
-		return false;
+		return -1;
 	}
 
-	Slab * slab = findSlab(w, h, d, x, y, z);
-	if (slab)
+	int index = findSlab(w, h, d, x, y, z);
+	if (index != -1)
 	{
-		return true;
+		return index;
 	}
 
 	//if we get here either we did not find a slab or it is full so we need another.
-	slab = allocSlab(w, h);
+	Slab * slab = allocSlab(w, h);
 
 	if (slab == NULL)
 	{
 		foundation.printLine("VolumeAtlas::findSpace(): cannot allocate Slab.");
-		return false;
+		return -1;
 	}
 
-	allocInSlab(slab, d, x, y, z);	//if we just allocated the slab this must succeed because this is a fresh full depth slab.
-	return true;
+	return allocInSlab(slab, d, x, y, z);	//if we just allocated the slab this must succeed because this is a fresh full depth slab.
 }
 
 unsigned VolumeAtlas::getAssetMapSizeInFloats()

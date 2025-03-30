@@ -10,6 +10,9 @@ public:
 	//the below is actually our error stream class which could be broken out....
 	void print(const char * string);
 	void printLine(const char * string=nullptr, const char * string2=nullptr);	//can add more optional params if needed.  function will print the string sequence concatenated, then a newline.
+	
+	void printf(const char* format, ...);
+	
 	void fatal(const char * string); 
 	void assertViolation(const char* exp, const char* file, int line, bool& ignore);
 

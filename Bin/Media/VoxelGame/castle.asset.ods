@@ -1,0 +1,9 @@
+Asset
+    {
+    voxvol { "castle.magica.voxvol";}	
+    physics
+        {
+        collider { voxel; }
+
+        }
+    }

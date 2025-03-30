@@ -53,6 +53,13 @@ void Foundation::printLine(const char * string, const char * string2)
 	printf("\n");
 	}
 
+void Foundation::printf(const char* format, ...)
+	{
+	va_list args;
+	va_start(args, format);
+	vprintf(format, args);
+	va_end(args);
+	}
 
 void Foundation::fatal(const char * string)
 	{

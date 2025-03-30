@@ -27,19 +27,18 @@ Commands
 
 		#atlas allocator needs w and h to be the same
 		loadResource { voxmap; "f.tiled(192 192 32).voxvol"; }
-		#loadResource { voxmap; "f.tiled(128 128 32).voxvol"; }
+		loadAssets { voxmap; } #Load all assets in resource directory, store voxvols in voxmap.
 
-		loadSubResource { voxmap; "f.terrain(0 0 0).voxvol"; }
-		loadSubResource { voxmap; "f.terrain(32 0 0).voxvol";}
-		loadSubResource { voxmap; "f.terrain(64 0 0).voxvol";}
-		loadSubResource { voxmap; "f.terrain(0 0 32).voxvol";}
-		loadSubResource { voxmap; "f.terrain(32 0 32).voxvol";}
-		loadSubResource { voxmap; "f.terrain(64 0 32).voxvol";}
-		loadSubResource { voxmap; "f.planet.voxvol";}
-		loadSubResource { voxmap; "castle.magica.voxvol";}	
-		loadSubResource { voxmap; "deer.magica.voxvol"; }	#special size: 104x9x27, 4 frames, each 26 long
+		voxelGameInitPhysics;
+		loadScene { "devworld.scene.ods"; }
 
+		# old stuff - individual subresource loading: 
+		#loadSubResource { voxmap; "f.terrain(0 0 0).voxvol"; }
+		#loadSubResource { voxmap; "f.planet.voxvol";}
+		#loadSubResource { voxmap; "castle.magica.voxvol";}	
+		#loadSubResource { voxmap; "deer.magica.voxvol"; }	#special size: 104x9x27, 4 frames, each 26 long
 
+		#lighting is probably obsolete now and should get redone: 
 		#loadResource{ lightmap; "f.zero(12 98304).array"; }		#12 is size of Vec3; 98304 is 32*32*32*3 - a hex has 6 faces, but each is shared between 2 neighbors. Initialize to zero.
 		#loadResource{ bouncemap1; "f.zero(12 98304).array"; }	#allocate new lightmap as bounce light destination
 
@@ -83,6 +82,7 @@ Commands
 	renderCallback	#a command sequence
 		{
 		setCommonPShaderConstants { cameraConstants; }
+		voxelGameTickPhysics;
 		voxelGameTick { instancesSB; }			#call C++ function to update the structured buffer
 
 		bindResourceSlot { voxmap; 0; }	

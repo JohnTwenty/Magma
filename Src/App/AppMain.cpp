@@ -102,7 +102,7 @@ void cmdAppLoop()
 		//timing
 		gTime = SDL_GetTicks();	
 
-		if (gTime > (gLastMoveTime + 10))//update at 100 Hz
+		if (gTime > (gLastMoveTime + 5))//cap update at 200 Hz
 			{
 			gLastMoveTime = gTime;
 			gFrameCount++;
