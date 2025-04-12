@@ -22,9 +22,12 @@ extern unsigned gTime;	//milliseconds since the SDL library initialized.
 struct SceneInstance
 {
 	PxVec3 position;
+	float lifeTime; 	//how long it has been alive
 	unsigned assetIndex;
 	unsigned currentFrameIndex;
 	PxQuat scaledOrientation;
+	PxRigidDynamic* body;	//TODO: move this somewhere else, it is not needed by everything.
+	bool killFlag; 		//if this gets raised, gets destroyed in its own tick.
 };
 #define MAX_INSTANCES 128	//this has to match the size of the instance buffer in the compute shader and in VoxelGame.Commands.ods TODO: make dynamic somehow.
 SceneInstance sceneInstances[MAX_INSTANCES];
@@ -43,9 +46,6 @@ DrawInstance drawInstances[MAX_INSTANCES];
 static unsigned numDrawInstances = 0;
 
 
-/*
-* New experiment to test PhysX
-*/
 
 using namespace physx;
 
@@ -57,15 +57,35 @@ static PxDefaultCpuDispatcher* gDispatcher = NULL;
 static PxScene* gScene = NULL;
 static PxMaterial* gMaterial = NULL;
 static PxPvd* gPvd = NULL;
-static PxRigidDynamic* gDynamic = NULL;
+//static PxRigidDynamic* gDynamic = NULL;
 static ResourceId tmpVoxMap = 0;	//dirty way of passing the voxmap resource id to the iterateFiles callback. 
+
+
+
+struct Behavior
+{
+	//unsigned name; //name handle in StringManager
+	const char * nameStr; 
+	void(*fptrOnTick) (SceneInstance &, float dt);
+};
+
+static void onTick_rb(SceneInstance &inst, float dt);
+static void onTick_player(SceneInstance &inst, float dt);
+#define NUM_BEHAVIORS 3
+static Behavior behaviors[NUM_BEHAVIORS] =
+{
+	{ "", NULL },
+	{ "rb", onTick_rb },
+	{ "shooter_player", onTick_player }
+};
 
 struct Asset
 {
-	Asset(unsigned name, unsigned volumeAtlasFirstFrameIndex, unsigned numFrames) : name(name), volumeAtlasFirstFrameIndex(volumeAtlasFirstFrameIndex), numFrames(numFrames) {}
+	Asset(unsigned name, unsigned volumeAtlasFirstFrameIndex, unsigned numFrames, unsigned behavior) : name(name), volumeAtlasFirstFrameIndex(volumeAtlasFirstFrameIndex), numFrames(numFrames), behavior(behavior) {}
 	unsigned name;	//name handle in StringManager
 	unsigned volumeAtlasFirstFrameIndex;	//voxvol specific index
 	unsigned numFrames;
+	unsigned behavior;
 };
 
 Array<Asset, Allocator> assets;
@@ -93,9 +113,9 @@ static void cmdVoxelGameInitPhysics()
 	gScene = gPhysics->createScene(sceneDesc);
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
-	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 40), *gMaterial);
 	gScene->addActor(*groundPlane);
-	gDynamic = createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10));
+//	gDynamic = createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10));
 
 }
 
@@ -105,27 +125,42 @@ static void parseAsset(ODBlock & odBlock, const char * name)
 	Asset
 	{
 	voxvol { "castle.magica.voxvol";}	
+	behavior { rb; }
 	physics
 		{
 		collider { voxel; }
 		}
 	}
 	*/
-	const char * voxvol;
+	const char * voxvol = NULL;
 	odBlock.getBlockString("voxvol", &voxvol);
 	foundation.printLine("  voxvol:", voxvol);
 	ODBlock * physicsBlock = odBlock.getBlock("physics");
 	if (physicsBlock)
 		{
-		const char * collider;
+		const char * collider = NULL;
 		physicsBlock->getBlockString("collider", &collider);
 		foundation.printLine("  collider:", collider);
 		}	
 
+	unsigned behavior = 0;
+	const char * behaviorStr = NULL;
+	odBlock.getBlockString("behavior", &behaviorStr);
+	foundation.printLine("  behavior:", behaviorStr);
+
+	if (behaviorStr)
+	{
+		for (unsigned i = 0; i < NUM_BEHAVIORS; i++)
+			if (strcmp(behaviorStr, behaviors[i].nameStr) == 0)
+			{
+				behavior = i; break;
+			}
+	}
+
 	unsigned firstFrameIndex = 0;
 	unsigned numFrames = resourceManager.loadVolumeIntoAtlas(tmpVoxMap, voxvol, firstFrameIndex);
 
-	assets.pushBack(Asset(stringManager.addString(name), firstFrameIndex, numFrames));
+	assets.pushBack(Asset(stringManager.addString(name), firstFrameIndex, numFrames, behavior));
 	Asset & a = assets.back();
 	foundation.printf("  asset: %s, firstFrameIndex: %u, numFrames: %u\n", stringManager.lookupString(a.name), a.volumeAtlasFirstFrameIndex, a.numFrames);	
 }
@@ -236,7 +271,7 @@ Scene   #aka map or world - instances assets into instances.
 				if (numSceneInstances < MAX_INSTANCES && assetIndex != ~0u)
 				{
 					SceneInstance& inst = sceneInstances[numSceneInstances];
-
+					inst.lifeTime = 0.0f; 
 					inst.assetIndex = assetIndex;
 					inst.currentFrameIndex = 0;
 					inst.position = PxVec3(x, y, z);
@@ -244,6 +279,8 @@ Scene   #aka map or world - instances assets into instances.
 					inst.scaledOrientation *= PxQuat(ry * 3.14159f / 180.0f, PxVec3(1.0f, 0.0f, 0.0f));
 					inst.scaledOrientation *= PxQuat(rz * 3.14159f / 180.0f, PxVec3(0.0f, 0.0f, 1.0f));
 					inst.scaledOrientation *= s;
+					inst.killFlag = false;
+					inst.body = NULL;
 					numSceneInstances++;
 				}
 			}
@@ -252,6 +289,51 @@ Scene   #aka map or world - instances assets into instances.
 
 
 }
+
+/////////Maybe move to a more game specific file? 
+
+static void onTick_rb(SceneInstance &inst, float dt)
+{
+	if (inst.killFlag)
+	{
+		// delete actor from PhysX + return
+	}
+else if (inst.lifeTime == 0.0f) 
+	{
+		//create actor in physx
+		inst.body = createDynamic(PxTransform(inst.position, inst.scaledOrientation.getNormalized()), PxSphereGeometry(10));	//PxVec3(0, 40, 100)	//TODO: make real collider.
+
+	}
+
+	//update own pose from physx
+	if (inst.body)
+	{
+	PxTransform t = inst.body->getGlobalPose();
+	inst.position = t.p;
+	inst.scaledOrientation = t.q;
+	//inst.scaledOrientation *= 0.5f;	//TODO: add back scale support
+	}
+
+
+
+	inst.lifeTime += dt;
+
+
+
+}
+
+static void onTick_player(SceneInstance &inst, float dt)
+{
+	if (inst.killFlag)
+	{
+	}
+else if (inst.lifeTime == 0.0f) 
+	{
+	}
+	inst.lifeTime += dt;
+}
+
+
 
 static void cmdLoadScene(const char * scriptVar)
 {
@@ -284,17 +366,6 @@ static void cmdVoxelGameTickPhysics()
 		gScene->fetchResults(true);
 	}
 
-	//TODO: get xforms later:
-
-
-	/*PxU32 nbActors = gScene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
-	if (nbActors)
-	{
-		PxArray<PxRigidActor*> actors(nbActors);
-		scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<PxActor**>(&actors[0]), nbActors);
-		Snippets::renderActors(&actors[0], static_cast<PxU32>(actors.size()), true);
-	}
-	*/
 }
 
 void cmdVoxelGameTick(const char* scriptVar)	//scriptVar is the handle to constant buffer resource.
@@ -303,6 +374,13 @@ void cmdVoxelGameTick(const char* scriptVar)	//scriptVar is the handle to consta
 	//write instances to shader buffer:
 	//this has to be written otherwise the buffer will contain garbage.
 	ASSERT(numSceneInstances < MAX_INSTANCES);	//need a space for sentinel -- TODO:  pass the array length explicitly and get rid of the sentinel.
+	float animSeconds = 4.0f * (gTime % 1000) * 0.001f;
+	/*
+	static float gLastTime = gTime;	//the first time.
+	float dt = gTime - gLastTime; 
+	if (dt < ...)
+	*/
+	float dt = 1.0f / 60.0f; 	//TODO: measure real time later
 
 	//TODO: frustum cull scene instances and copy to drawInstances:
 	numDrawInstances = 0;
@@ -312,20 +390,17 @@ void cmdVoxelGameTick(const char* scriptVar)	//scriptVar is the handle to consta
 		DrawInstance& drawInst = drawInstances[i];
 		drawInst.position = inst.position;
 
+		Behavior & behavior = behaviors[assets[inst.assetIndex].behavior];
+		if (behavior.fptrOnTick)
+			behavior.fptrOnTick(inst, dt);
+
+
+
 		//hack to animate all animated instances: 
 		if (assets[inst.assetIndex].numFrames > 1)
 		{
-			float animSeconds = 4.0f * (gTime % 1000) * 0.001f;
 			unsigned deerFrame = ((unsigned)animSeconds) % assets[inst.assetIndex].numFrames;
 			inst.currentFrameIndex = deerFrame;
-		}
-		//hack for physics based planet: 
-		if (i == 0)
-		{
-			PxTransform t = gDynamic->getGlobalPose();
-			inst.position = t.p;
-			inst.scaledOrientation = t.q;
-			inst.scaledOrientation *= 0.5f;
 		}
 		//hack to spin planet: (yes we have no way of knowing the index at compile time)
 		if (i == 1)

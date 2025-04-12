@@ -1,6 +1,7 @@
 Asset
     {
     voxvol { "castle.magica.voxvol";}	
+    behavior { rb; }
     physics
         {
         collider { voxel; }

@@ -8,8 +8,8 @@ Scene   #aka map or world - instances assets into instances.
     instances
         {            #x y z rx ry rz s
         planet      { 56; -10; 16; 16; 0; 0; 0.5;}
-        planet      { 56; -10; 16; 0; 0; 0; 0.5;}
-        castle      { 11; -20; 0; 0; 90; 0; 1;}
+        planet      { 30; -10; 16; 0; 0; 0; 0.5;}
+        castle      { 41; -20; 0; 0; 90; 0; 1;}
         deer        { 55; -6.4; 15; 0; 90; 0; 0.15;}
 
         terrain000  {  0; -20; 0; 0; 0; 0; 1;}

@@ -1,6 +1,7 @@
 Asset
     {
     voxvol { "deer.magica.voxvol";}	
+    behavior { shooter_player; }
     physics
         {
         collider { aabb; }

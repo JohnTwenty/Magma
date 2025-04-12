@@ -1,6 +1,7 @@
 Asset
     {
-    voxvol { "f.planet.voxvol";}	
+    voxvol { "f.planet.voxvol";}
+    behavior { bullet; }	
     physics
         {
         collider { sphere; }
