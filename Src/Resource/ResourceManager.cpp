@@ -1057,7 +1057,7 @@ void ResourceManager::bindResource(ResourceId id, unsigned slot, bool unbind)
 
 		break;
 		default:
-        foundation.printLine("ResourceManager::bindShader(): shader resource expected!");
+                foundation.printLine("ResourceManager::bindResource(): shader resource expected!");
 
 		}
 	}
