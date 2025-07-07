@@ -11,7 +11,7 @@ I thought (and still think!) that writing shaders in Shadertoy was very, very co
 
 * I was curious about the so called 'host side' graphics programming that shadertoy was completely hiding from me.  That is essentially the admittedly boring CPU side code that loads resources, compiles shaders, binds and populates buffers, and so on.  I wanted to be able to write that stuff myself too, primarily as a means of learning all aspects of modern graphics programming.
 
-* Modern GPUs support at least three flavors of shaders: Vertex shaders, pixel shaders and compute shaders.  Shadertoy focuses exclusively on pixel shaders, but I wanted to be able to write and explore all three kinds, compute shaders expecially.
+* Modern GPUs support at least three flavors of shaders: Vertex shaders, pixel shaders and compute shaders.  Shadertoy focuses exclusively on pixel shaders, but I wanted to be able to write and explore all three kinds, compute shaders especially.
 
 * Shadertoy offers you the ability to create buffers of data (like textures) that you can send to your shaders for processing, but it is relatively limited in what you can do in this department, and I wanted to have more flexibility here.
 
