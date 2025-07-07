@@ -19,7 +19,7 @@ class RenderTransforms
 
 	void setProjection(float nearPlaneWidth, float nearPlaneHeight, float zNear, float zFar)
 		{
-		this->nearPlaneHeight = nearPlaneWidth;
+		this->nearPlaneWidth = nearPlaneWidth;
 		this->nearPlaneHeight = nearPlaneHeight;
 		this->zNear = zNear;
 		this->zFar = zFar;
